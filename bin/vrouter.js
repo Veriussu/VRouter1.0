@@ -2,12 +2,14 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawn, spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 // Keep runtime state outside the repository so updates never touch it.
 const PID_FILE = process.env.VROUTER_PID_FILE || '/tmp/vrouter.pid';
 const LOG_FILE = process.env.VROUTER_LOG_FILE || '/tmp/vrouter.log';
+const ARCHIVE_URL = process.env.VROUTER_ARCHIVE_URL || 'https://codeload.github.com/Veriussu/VRouter1.0/tar.gz/refs/heads/main';
 
 function readPid() {
   try {
@@ -75,17 +77,30 @@ function update() {
   const wasRunning = running();
   if (wasRunning) stop();
   let exitCode = 0;
+  let tempDir;
   try {
-    const fetch = spawnSync('git', ['fetch', '--quiet', 'origin', 'main'], { cwd: ROOT, encoding: 'utf8' });
-    if (fetch.status !== 0) {
-      process.stderr.write(fetch.stderr || fetch.stdout || 'GitHub bağlantısı başarısız\n');
-      exitCode = fetch.status || 1;
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vrouter-update-'));
+    const archive = path.join(tempDir, 'vrouter.tar.gz');
+    const download = spawnSync('curl', ['-fsSL', ARCHIVE_URL, '-o', archive], { encoding: 'utf8' });
+    if (download.status !== 0) {
+      process.stderr.write(download.stderr || 'GitHub güncellemesi indirilemedi\n');
+      exitCode = download.status || 1;
     }
     if (exitCode === 0) {
-      const reset = spawnSync('git', ['reset', '--hard', 'origin/main'], { cwd: ROOT, encoding: 'utf8' });
-      if (reset.status !== 0) {
-        process.stderr.write(reset.stderr || reset.stdout || 'GitHub güncellemesi başarısız\n');
-        exitCode = reset.status || 1;
+      const extract = spawnSync('tar', ['-xzf', archive, '-C', tempDir], { encoding: 'utf8' });
+      if (extract.status !== 0) {
+        process.stderr.write(extract.stderr || 'VRouter arşivi açılamadı\n');
+        exitCode = extract.status || 1;
+      }
+    }
+    if (exitCode === 0) {
+      const source = fs.readdirSync(tempDir, { withFileTypes: true })
+        .find((entry) => entry.isDirectory() && entry.name !== 'node_modules')?.name;
+      if (!source) {
+        process.stderr.write('VRouter güncelleme klasörü bulunamadı\n');
+        exitCode = 1;
+      } else {
+        fs.cpSync(path.join(tempDir, source), ROOT, { recursive: true, force: true });
       }
     }
     if (exitCode === 0) {
@@ -93,6 +108,7 @@ function update() {
       exitCode = install.status || 0;
     }
   } finally {
+    if (tempDir) fs.rmSync(tempDir, { recursive: true, force: true });
     if (wasRunning) start();
   }
   if (exitCode === 0) console.log('VRouter güncellendi.');
