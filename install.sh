@@ -22,6 +22,8 @@ fi
 
 if [ -d "$INSTALL_DIR/.git" ]; then
   git -C "$INSTALL_DIR" remote set-url origin "$REPO_URL" 2>/dev/null || true
+  git -C "$INSTALL_DIR" fetch --quiet origin main
+  git -C "$INSTALL_DIR" branch --set-upstream-to=origin/main main >/dev/null 2>&1 || true
   git -C "$INSTALL_DIR" pull --ff-only
 else
   if [ -e "$INSTALL_DIR" ]; then

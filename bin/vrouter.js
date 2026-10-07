@@ -76,14 +76,22 @@ function update() {
   if (wasRunning) stop();
   let exitCode = 0;
   try {
-    const pull = spawnSync('git', ['pull', '--ff-only'], { cwd: ROOT, encoding: 'utf8' });
-    if (pull.status !== 0) {
-      process.stderr.write(pull.stderr || pull.stdout || 'Git güncellemesi başarısız\n');
-      exitCode = pull.status || 1;
-    } else {
-      process.stdout.write(pull.stdout || '');
-      const install = spawnSync('npm', ['install', '--omit=dev'], { cwd: ROOT, stdio: 'inherit' });
-      exitCode = install.status || 0;
+    const fetch = spawnSync('git', ['fetch', '--quiet', 'origin', 'main'], { cwd: ROOT, encoding: 'utf8' });
+    if (fetch.status !== 0) {
+      process.stderr.write(fetch.stderr || fetch.stdout || 'GitHub bağlantısı başarısız\n');
+      exitCode = fetch.status || 1;
+    }
+    if (exitCode === 0) {
+      spawnSync('git', ['branch', '--set-upstream-to=origin/main', 'main'], { cwd: ROOT, encoding: 'utf8' });
+      const pull = spawnSync('git', ['pull', '--ff-only'], { cwd: ROOT, encoding: 'utf8' });
+      if (pull.status !== 0) {
+        process.stderr.write(pull.stderr || pull.stdout || 'Git güncellemesi başarısız\n');
+        exitCode = pull.status || 1;
+      } else {
+        process.stdout.write(pull.stdout || '');
+        const install = spawnSync('npm', ['install', '--omit=dev'], { cwd: ROOT, stdio: 'inherit' });
+        exitCode = install.status || 0;
+      }
     }
   } finally {
     if (wasRunning) start();
