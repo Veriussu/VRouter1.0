@@ -25,6 +25,9 @@ curl -fsSL https://raw.githubusercontent.com/Veriussu/VRouter1.0/main/install.sh
 
 Kurulum `~/.vrouter` içine yapılır ve `vrouter` komutu `~/.local/bin` altına eklenir.
 PATH henüz tanımlı değilse terminalin önerdiği `export PATH=...` satırını çalıştırın.
+Kurulum sırasında GitHub kullanıcı adı veya şifre istenmez; proje public olarak indirilir.
+
+VRouter hakkında: [veriussu.com](https://veriussu.com) · `info@veriussu.com`
 
 ### Kaynak koddan kurulum
 
