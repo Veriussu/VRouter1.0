@@ -1,0 +1,32 @@
+{
+  "name": "vrouter",
+  "version": "0.1.0",
+  "description": "VRouter - Multi-provider LLM gateway with API key rotation, model aliasing and token compression",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "bin": {
+    "vrouter": "bin/vrouter.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "sync": "node scripts/sync.js",
+    "test": "node scripts/test.js",
+    "mock": "node scripts/mock-provider.js",
+    "restart": "bash scripts/restart.sh",
+    "test:ui": "node scripts/test-ui.js",
+    "ui:check": "node scripts/ui-check.js",
+    "ui:shot": "node scripts/ui-interact.js",
+    "ui:pages": "node scripts/ui-pages.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

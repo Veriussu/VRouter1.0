@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VRouter — Panel</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛣️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">VR</span>
+        <div>
+          <div class="brand-name">VRouter</div>
+          <div class="brand-version">0.1.0-beta</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-page="dashboard">Genel Bakış</button>
+        <button class="nav-item" data-page="providers">Sağlayıcılar</button>
+        <button class="nav-item" data-page="keys">Anahtarlar</button>
+        <button class="nav-item" data-page="models">Modeller</button>
+        <button class="nav-item" data-page="apikeys">API Anahtarları</button>
+        <button class="nav-item" data-page="logs">İstek Logları</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 id="pageTitle">Genel Bakış</h1>
+        <div class="topbar-right">
+          <span class="badge" id="serverBadge">bağlanıyor…</span>
+        </div>
+      </header>
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Modal</h3>
+        <button class="btn-icon" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
