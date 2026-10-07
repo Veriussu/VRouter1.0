@@ -69,6 +69,7 @@ app.get('/v1', (req, res) =>
 
 // API rotaları
 app.use('/v1', require('./routes/v1'));
+app.use('/admin/api/auth', require('./routes/auth'));
 app.use('/admin/api', require('./routes/admin'));
 
 // Arayüz

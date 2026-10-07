@@ -61,6 +61,23 @@ body {
 
 .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
 .sync-info { font-size: 11px; color: var(--muted); margin-bottom: 8px; font-family: var(--mono); }
+.logout-btn { color: var(--muted); text-align: left; }
+.logout-btn:hover { color: var(--red); border-color: rgba(242,88,91,.4); }
+
+/* -------------------------------- auth -------------------------------- */
+.auth-screen .sidebar, .auth-screen .topbar { display: none; }
+.auth-screen .main { min-height: 100vh; }
+.auth-screen .content { padding: 24px; }
+.auth-wrap { min-height: calc(100vh - 48px); display: grid; place-items: center; }
+.auth-card {
+  width: 100%; max-width: 390px; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px; box-shadow: 0 22px 70px rgba(0,0,0,.35);
+}
+.auth-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 28px; }
+.auth-card h1 { font-size: 21px; margin-bottom: 5px; }
+.auth-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+.auth-error { min-height: 20px; color: var(--red); font-size: 12px; margin: -3px 0 8px; }
+.auth-note { text-align: center; color: var(--muted); font-size: 11px; margin-top: 20px; }
 
 /* -------------------------------- main -------------------------------- */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }

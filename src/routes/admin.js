@@ -8,6 +8,9 @@ const logger = require('../services/logger');
 const rotator = require('../services/keyRotator');
 const syncSvc = require('../services/sync');
 const { db, getSetting, setSetting } = require('../db');
+const auth = require('../services/auth');
+
+router.use(auth.requireSession);
 
 const parseJson = (s, f = {}) => { try { return JSON.parse(s); } catch { return f; } };
 

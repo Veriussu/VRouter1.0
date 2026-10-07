@@ -42,6 +42,13 @@ vrouter start
 
 Yerleşik sağlayıcılar (`local`, `vprovider`, `veriussu`) ilk açılışta otomatik oluşturulur.
 
+### Panel girişi
+
+Panel ilk açıldığında bir yönetici hesabı oluşturma ekranı gelir. Bu hesap yalnızca ilk
+kurulumda oluşturulur; sonraki girişlerde kullanıcı adı ve şifre ile login ekranı açılır.
+Yönetim API'si ve panel sayfalarının işlemleri oturum gerektirir. Oturum, sol menünün
+altındaki **Çıkış yap** düğmesiyle kapatılabilir.
+
 ## Terminal komutları
 
 VRouter servis olarak arka planda çalışır ve `stop` verilene kadar açık kalır:

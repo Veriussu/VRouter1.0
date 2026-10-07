@@ -4,6 +4,7 @@
 const api = {
   async get(path) {
     const r = await fetch(`/admin/api${path}`);
+    if (r.status === 401) { window.location.reload(); throw new Error('Oturum süresi doldu'); }
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText);
     return r.json();
   },
@@ -14,6 +15,7 @@ const api = {
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await r.json().catch(() => ({}));
+    if (r.status === 401) { window.location.reload(); throw new Error('Oturum süresi doldu'); }
     if (!r.ok) throw new Error(data.error || r.statusText);
     return data;
   },
@@ -23,6 +25,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const content = $('#content');
 const state = { models: [], providers: [], categories: [] };
+let authUser = null;
 
 /* ------------------------------- yardımcılar ------------------------------- */
 
@@ -65,6 +68,68 @@ function toast(msg, kind = 'info') {
     el.style.transition = 'opacity .25s';
     setTimeout(() => el.remove(), 250);
   }, 3800);
+}
+
+/* -------------------------------- kimlik -------------------------------- */
+
+async function authFetch(path, body) {
+  const r = await fetch(`/admin/api/auth${path}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || r.statusText);
+  return data;
+}
+
+function renderAuth(setup) {
+  document.body.classList.add('auth-screen');
+  $('#serverBadge').textContent = 'giriş gerekli';
+  $('#serverBadge').className = 'badge';
+  content.innerHTML = `
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="auth-brand"><span class="brand-mark">VR</span><div><div class="brand-name">VRouter</div><div class="brand-version">Yönetim Paneli</div></div></div>
+        <h1>${setup ? 'İlk kurulumu tamamlayın' : 'Tekrar hoş geldiniz'}</h1>
+        <p class="auth-subtitle">${setup ? 'Panel için bir yönetici hesabı oluşturun.' : 'Devam etmek için giriş yapın.'}</p>
+        <form id="authForm">
+          <div class="field"><label for="authUsername">Kullanıcı adı</label><input class="input" id="authUsername" autocomplete="username" required minlength="3" autofocus></div>
+          <div class="field"><label for="authPassword">Şifre</label><input class="input" id="authPassword" type="password" autocomplete="${setup ? 'new-password' : 'current-password'}" required minlength="6"></div>
+          <div class="auth-error" id="authError"></div>
+          <button class="btn btn-primary btn-block" id="authSubmit" type="submit">${setup ? 'Hesap oluştur' : 'Giriş yap'}</button>
+        </form>
+        <div class="auth-note">VRouter · veriussu.com</div>
+      </div>
+    </div>`;
+  $('#authForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const button = $('#authSubmit');
+    const error = $('#authError');
+    button.disabled = true;
+    error.textContent = '';
+    try {
+      const body = { username: $('#authUsername').value.trim(), password: $('#authPassword').value };
+      await authFetch(setup ? '/register' : '/login', body);
+      window.location.reload();
+    } catch (err) {
+      error.textContent = err.message;
+      button.disabled = false;
+    }
+  });
+}
+
+async function initAuth() {
+  try {
+    const r = await fetch('/admin/api/auth/status');
+    const status = await r.json();
+    if (!status.authenticated) return renderAuth(status.setup_required);
+    authUser = status.username;
+    document.body.classList.remove('auth-screen');
+    navigate(initialPage(), false);
+  } catch {
+    renderAuth(false);
+  }
 }
 
 /* ------------------------------ modal yığını ------------------------------ */
@@ -1267,9 +1332,13 @@ function initialPage() {
   return p && TITLES[p] ? p : 'dashboard';
 }
 
-health();
-setInterval(health, 15000);
-navigate(initialPage(), false);
+$('#logoutBtn').addEventListener('click', async () => {
+  await authFetch('/logout', {});
+  window.location.reload();
+});
+
+initAuth();
+setInterval(() => { if (authUser) health(); }, 15000);
 
 // Tarayıcı geri/ileri tuşları
 window.addEventListener('popstate', () => navigate(initialPage(), false));
