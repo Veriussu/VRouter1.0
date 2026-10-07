@@ -82,16 +82,15 @@ function update() {
       exitCode = fetch.status || 1;
     }
     if (exitCode === 0) {
-      spawnSync('git', ['branch', '--set-upstream-to=origin/main', 'main'], { cwd: ROOT, encoding: 'utf8' });
-      const pull = spawnSync('git', ['pull', '--ff-only'], { cwd: ROOT, encoding: 'utf8' });
-      if (pull.status !== 0) {
-        process.stderr.write(pull.stderr || pull.stdout || 'Git güncellemesi başarısız\n');
-        exitCode = pull.status || 1;
-      } else {
-        process.stdout.write(pull.stdout || '');
-        const install = spawnSync('npm', ['install', '--omit=dev'], { cwd: ROOT, stdio: 'inherit' });
-        exitCode = install.status || 0;
+      const reset = spawnSync('git', ['reset', '--hard', 'origin/main'], { cwd: ROOT, encoding: 'utf8' });
+      if (reset.status !== 0) {
+        process.stderr.write(reset.stderr || reset.stdout || 'GitHub güncellemesi başarısız\n');
+        exitCode = reset.status || 1;
       }
+    }
+    if (exitCode === 0) {
+      const install = spawnSync('npm', ['install', '--omit=dev'], { cwd: ROOT, stdio: 'inherit' });
+      exitCode = install.status || 0;
     }
   } finally {
     if (wasRunning) start();

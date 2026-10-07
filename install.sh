@@ -23,8 +23,9 @@ fi
 if [ -d "$INSTALL_DIR/.git" ]; then
   git -C "$INSTALL_DIR" remote set-url origin "$REPO_URL" 2>/dev/null || true
   git -C "$INSTALL_DIR" fetch --quiet origin main
-  git -C "$INSTALL_DIR" branch --set-upstream-to=origin/main main >/dev/null 2>&1 || true
-  git -C "$INSTALL_DIR" pull --ff-only
+  # Existing installs may contain the bootstrap commit from an older installer.
+  # Align tracked application files with GitHub while preserving ignored data/.env.
+  git -C "$INSTALL_DIR" reset --hard origin/main >/dev/null
 else
   if [ -e "$INSTALL_DIR" ]; then
     echo "Kurulum klasörü zaten mevcut ve Git deposu değil: $INSTALL_DIR" >&2
