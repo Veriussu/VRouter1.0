@@ -20,24 +20,23 @@ if ! command -v curl >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
   exit 1
 fi
 
+archive_dir=$(mktemp -d)
+trap 'rm -rf "$archive_dir"' EXIT
+curl -fsSL "$ARCHIVE_URL" | tar -xz -C "$archive_dir"
+extracted_dir=$(find "$archive_dir" -mindepth 1 -maxdepth 1 -type d -print -quit)
+if [ -z "$extracted_dir" ]; then
+  echo "VRouter arşivi indirilemedi." >&2
+  exit 1
+fi
+
 if [ -d "$INSTALL_DIR/.git" ]; then
-  git -C "$INSTALL_DIR" remote set-url origin "$REPO_URL" 2>/dev/null || true
-  git -C "$INSTALL_DIR" fetch --quiet origin main
-  # Existing installs may contain the bootstrap commit from an older installer.
-  # Align tracked application files with GitHub while preserving ignored data/.env.
-  git -C "$INSTALL_DIR" reset --hard origin/main >/dev/null
+  # Update from the public archive directly. This avoids Git credentials and
+  # divergent-branch errors while preserving ignored data/.env files.
+  cp -a "$extracted_dir"/. "$INSTALL_DIR"/
 else
   if [ -e "$INSTALL_DIR" ]; then
     echo "Kurulum klasörü zaten mevcut ve Git deposu değil: $INSTALL_DIR" >&2
     echo "VROUTER_HOME ile boş veya farklı bir klasör seçin." >&2
-    exit 1
-  fi
-  archive_dir=$(mktemp -d)
-  trap 'rm -rf "$archive_dir"' EXIT
-  curl -fsSL "$ARCHIVE_URL" | tar -xz -C "$archive_dir"
-  extracted_dir=$(find "$archive_dir" -mindepth 1 -maxdepth 1 -type d -print -quit)
-  if [ -z "$extracted_dir" ]; then
-    echo "VRouter arşivi indirilemedi." >&2
     exit 1
   fi
   mv "$extracted_dir" "$INSTALL_DIR"
